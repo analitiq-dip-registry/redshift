@@ -1,10 +1,10 @@
-# REPLACE_CONNECTOR_NAME
+# Amazon Redshift
 
-REPLACE with a short description of what this connector does and what system it integrates with.
+Read schemas and tables from an Amazon Redshift cloud data warehouse.
 
 ## What is this?
 
-This is a **connector** — a configuration that defines how to authenticate with REPLACE_SYSTEM_NAME and what data endpoints are available for reading and writing. It does not move data by itself. Instead, it is used by the [Analitiq](https://analitiq-app.com) data integration platform or the open-source `analitiq-dip-registry` engine to set up data pipelines.
+This is a **connector** — a configuration that defines how to authenticate with Amazon Redshift and what data is available for reading. It does not move data by itself. Instead, it is used by the [Analitiq](https://analitiq-app.com) data integration platform or the open-source `analitiq-dip-registry` engine to set up data pipelines.
 
 ## How to use this connector
 
@@ -27,43 +27,48 @@ The `analitiq-plugin-dataflow` plugin will automatically fetch the required conn
 
 ## Prerequisites
 
-REPLACE with what the user needs before they can connect. Be specific:
+Before you can connect, you need:
 
-- e.g., "A registered OAuth2 application with client ID and client secret"
-- e.g., "An API key generated from your account settings"
-- e.g., "Admin access to your organisation's account"
+- A running Amazon Redshift cluster and its endpoint (host) and port (default `5439`).
+- The name of a database on the cluster (e.g. `dev`).
+- A database user with a password and `SELECT` privileges on the schemas/tables you want to read.
+- Network access to the cluster (a publicly accessible cluster, or connectivity via VPC/VPN/SSH as appropriate), and the cluster's security group allowing inbound traffic on the Redshift port from your client.
 
 ## Authentication
 
-REPLACE with a plain-language explanation of how to authenticate. If the system supports multiple authentication methods, explain when to use each one.
+This connector authenticates with a **database username and password** over TLS, using the SQLAlchemy `redshift+redshift_connector` dialect (Amazon's official `redshift_connector` Python driver).
+
+You provide the host, port, database, username, and password, and choose an SSL mode (`none`, `prefer`, `require`, `verify-ca`, or `verify-full`; the default is `verify-ca`). For `verify-ca` / `verify-full` you may supply a CA certificate (PEM) to verify the server.
+
+AWS IAM temporary-credential authentication is supported by Redshift but is **not** implemented in this connector version.
 
 ### How to get your credentials
 
-REPLACE with step-by-step instructions:
-
-1. e.g., "Log in to your account at https://app.example.com"
-2. e.g., "Navigate to Settings > API Keys"
-3. e.g., "Click 'Generate New Key' and copy the key"
+1. Open the [Amazon Redshift console](https://console.aws.amazon.com/redshiftv2/) and select your cluster.
+2. Copy the cluster **endpoint** — it has the form `host:port/database`, e.g. `my-cluster.abc123.us-west-1.redshift.amazonaws.com:5439/dev`.
+3. Use an existing database user, or create one and grant it read access:
+   ```sql
+   CREATE USER analitiq_reader PASSWORD 'your-strong-password';
+   GRANT USAGE ON SCHEMA public TO analitiq_reader;
+   GRANT SELECT ON ALL TABLES IN SCHEMA public TO analitiq_reader;
+   ```
+4. Ensure the cluster's security group allows inbound connections from your client on the Redshift port (default `5439`).
 
 ## Available Endpoints
 
-The table below lists all data endpoints defined by this connector. Each endpoint represents a resource you can read from or write to.
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-|          |        |             |
+This is a **database** connector — it has no fixed endpoint list. After you connect, the available schemas and tables are discovered automatically from Redshift's `information_schema`, and you select which tables to read. The catalog schemas `information_schema`, `pg_catalog`, and `pg_internal` are excluded from discovery.
 
 ## Limitations
 
-REPLACE with any important limitations users should know about:
-
-- **Rate limits** — e.g., "The API allows 60 requests per minute"
-- **Data freshness** — e.g., "Data may be delayed by up to 15 minutes"
-- **Sandbox vs Production** — e.g., "Sandbox and production use different API keys"
+- **Authentication** — Username/password only; AWS IAM temporary credentials are not supported in this version.
+- **Driver** — Redshift speaks the PostgreSQL wire protocol, but AWS does not test or support generic PostgreSQL drivers; this connector uses Amazon's `redshift_connector` driver.
+- **SSL modes** — The `redshift_connector` driver only honors `verify-ca` / `verify-full` at the driver level; other canonical `ssl_mode` values are reconciled by the runtime.
+- **Concurrency** — Bounded by the cluster's `max_connections` setting and WLM query-slot configuration.
+- **Type mapping** — Redshift-specific types are mapped as follows: `SUPER` → JSON; `GEOMETRY` / `GEOGRAPHY` / `HLLSKETCH` / `VARBYTE` → Binary; `INTERVAL` types → text; `TIMETZ` → Time.
 
 ## For AI agents
 
-This connector includes `CLAUDE.md` and `AGENTS.md` files — machine-readable references used by AI agents and agentic frameworks. They document authentication types, available endpoints, post-auth steps, and any caveats for programmatic use. Both files are kept identical — `CLAUDE.md` is for Claude Code, `AGENTS.md` is for other agent frameworks.
+This connector includes `CLAUDE.md` and `AGENTS.md` files — machine-readable references used by AI agents and agentic frameworks. They document authentication types, connection inputs, post-auth steps, and any caveats for programmatic use. Both files are kept identical — `CLAUDE.md` is for Claude Code, `AGENTS.md` is for other agent frameworks.
 
 ## Create a connector to any system
 
@@ -87,7 +92,8 @@ All connectors in this registry are community-maintained and live at [github.com
 
 ## Links
 
-- [API Documentation](REPLACE with URL)
+- [Amazon Redshift documentation](https://docs.aws.amazon.com/redshift/)
+- [Amazon Redshift data types](https://docs.aws.amazon.com/redshift/latest/dg/c_Supported_data_types.html)
 - [Analitiq Cloud](https://analitiq-app.com)
 - [Analitiq Engine (open source)](https://github.com/analitiq-ai/analitiq-engine)
 - [Analitiq DIP Registry (open source)](https://github.com/analitiq-dip-registry)
