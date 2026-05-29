@@ -1,43 +1,181 @@
 {
   "$schema": "https://schemas.analitiq.ai/connector/latest.json",
-  "kind": "api",
-  "display_name": "REPLACE",
-  "description": "REPLACE with a short description",
+  "kind": "database",
+  "connector_id": "redshift",
+  "display_name": "Amazon Redshift",
+  "description": "Amazon Redshift cloud data warehouse connector using the SQLAlchemy 'redshift+redshift_connector' dialect (Amazon's official redshift_connector driver). Authenticates with a database username and password over TLS. AWS IAM temporary credentials are not supported in this version.",
+  "tags": [
+    "database",
+    "warehouse",
+    "redshift",
+    "amazon",
+    "aws",
+    "sqlalchemy"
+  ],
   "version": "0.0.0",
-  "default_transport": "api",
+  "default_transport": "database",
   "transports": {
-    "api": {
-      "transport_type": "http",
-      "base_url": "https://api.example.com/v1/",
-      "headers": {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": { "template": "Bearer ${secrets.api_key}" }
+    "database": {
+      "transport_type": "sqlalchemy",
+      "driver": "redshift+redshift_connector",
+      "dsn": {
+        "kind": "url_template",
+        "template": "redshift+redshift_connector://{username}:{password}@{host}:{port}/{database}",
+        "bindings": {
+          "username": {
+            "value": {
+              "ref": "connection.parameters.username"
+            },
+            "encoding": "url_userinfo"
+          },
+          "password": {
+            "value": {
+              "ref": "secrets.password"
+            },
+            "encoding": "url_userinfo"
+          },
+          "host": {
+            "value": {
+              "ref": "connection.parameters.host"
+            },
+            "encoding": "host"
+          },
+          "port": {
+            "value": {
+              "ref": "connection.parameters.port"
+            },
+            "encoding": "raw"
+          },
+          "database": {
+            "value": {
+              "ref": "connection.parameters.database"
+            },
+            "encoding": "url_path_segment"
+          }
+        }
       },
-      "timeout_seconds": 30,
-      "rate_limit": {
-        "max_requests": 60,
-        "time_window_seconds": 60
+      "tls": {
+        "mode": {
+          "ref": "connection.parameters.ssl_mode"
+        },
+        "ca_certificate": {
+          "ref": "secrets.ssl_ca_certificate"
+        }
       }
     }
   },
   "auth": {
-    "type": "api_key"
+    "type": "db"
   },
   "connection_contract": {
     "inputs": {
-      "api_key": {
+      "host": {
         "source": "user",
         "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "ui": {
+          "label": "Host",
+          "placeholder": "cluster-name.xxxxxxxxxxxx.us-west-1.redshift.amazonaws.com"
+        }
+      },
+      "port": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "integer",
+        "required": true,
+        "default": 5439,
+        "ui": {
+          "label": "Port"
+        }
+      },
+      "database": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "ui": {
+          "label": "Database",
+          "placeholder": "dev"
+        }
+      },
+      "username": {
+        "source": "user",
+        "phase": "auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "ui": {
+          "label": "Username"
+        }
+      },
+      "password": {
+        "source": "user",
+        "phase": "auth",
         "storage": "secrets",
         "type": "string",
         "required": true,
         "secret": true,
         "ui": {
-          "label": "API Key",
+          "label": "Password",
           "widget": "password"
         }
+      },
+      "ssl_mode": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "none",
+          "prefer",
+          "require",
+          "verify-ca",
+          "verify-full"
+        ],
+        "default": "verify-ca",
+        "ui": {
+          "label": "SSL mode"
+        }
+      },
+      "ssl_ca_certificate": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "secrets",
+        "type": "string",
+        "required": false,
+        "secret": true,
+        "ui": {
+          "label": "SSL CA certificate (PEM)",
+          "widget": "textarea"
+        }
       }
+    }
+  },
+  "resource_discovery": {
+    "strategy": "information_schema",
+    "transport_ref": "database",
+    "implementation": {
+      "type": "builtin"
+    },
+    "options": {
+      "exclude_schemas": [
+        "information_schema",
+        "pg_catalog",
+        "pg_internal"
+      ]
+    },
+    "produces": [
+      "connection.endpoints",
+      "connection.type_map"
+    ],
+    "triggers": {
+      "list_resources": "on_activation",
+      "describe_resource": "on_resource_selected"
     }
   }
 }
