@@ -17,7 +17,6 @@
   "transports": {
     "database": {
       "transport_type": "sqlalchemy",
-      "driver": "redshift+redshift_connector",
       "dsn": {
         "kind": "url_template",
         "template": "redshift+redshift_connector://{username}:{password}@{host}:{port}/{database}",
@@ -61,6 +60,9 @@
         "ca_certificate": {
           "ref": "secrets.ssl_ca_certificate"
         }
+      },
+      "options": {
+        "sqlalchemy_registry_name": "redshift.redshift_connector"
       }
     }
   },
