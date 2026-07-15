@@ -1,0 +1,9 @@
+# SQLAlchemy dialect for Redshift. Registers the ``redshift`` and
+# ``redshift.redshift_connector`` entry points that the engine resolves
+# RedshiftDialect.sqlalchemy_registry_name against. >=0.8.14 is the first
+# release supporting SQLAlchemy 2.x.
+sqlalchemy-redshift>=0.8.14
+# Amazon's official Redshift DBAPI driver — the ``+redshift_connector``
+# half of the DSN. Sync-only: no async DBAPI exists for Redshift, so the
+# CDK transport factory routes this dialect to its sync engine path.
+redshift-connector>=2.1.0

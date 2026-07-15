@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "analitiq-connector-redshift"
+version = "0.0.1"
+description = "Analitiq connector for Amazon Redshift: dialect, driver, definition."
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools]
+packages = ["analitiq_connector_redshift"]
+package-dir = { "analitiq_connector_redshift" = "." }
+
+[project.entry-points."analitiq.source_connectors"]
+redshift = "analitiq_connector_redshift.connector:RedshiftConnector"
+
+[project.entry-points."analitiq.destination_connectors"]
+redshift = "analitiq_connector_redshift.connector:RedshiftConnector"

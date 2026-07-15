@@ -3,7 +3,7 @@
   "kind": "database",
   "connector_id": "redshift",
   "display_name": "Amazon Redshift",
-  "description": "Amazon Redshift cloud data warehouse connector using the SQLAlchemy 'redshift+redshift_connector' dialect (Amazon's official redshift_connector driver). Authenticates with a database username and password over TLS. AWS IAM temporary credentials are not supported in this version.",
+  "description": "Amazon Redshift cloud data warehouse connector using the SQLAlchemy 'redshift+redshift_connector' dialect (Amazon's official redshift_connector driver). Authenticates with a database username and password. TLS: the driver verifies the server certificate against its own bundled Amazon CA, so ssl_mode values weaker than verify-ca are reconciled upward to verify-ca, and a custom ssl_ca_certificate bundle is not supported by this driver (supplying one fails loudly rather than verifying against the wrong roots). AWS IAM temporary credentials are not supported in this version.",
   "tags": [
     "database",
     "warehouse",
@@ -131,7 +131,8 @@
         "type": "string",
         "required": true,
         "enum": [
-          "none",
+          "disable",
+          "allow",
           "prefer",
           "require",
           "verify-ca",
