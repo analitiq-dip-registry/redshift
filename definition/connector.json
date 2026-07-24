@@ -3,7 +3,7 @@
   "kind": "database",
   "connector_id": "redshift",
   "display_name": "Amazon Redshift",
-  "description": "Amazon Redshift cloud data warehouse connector using the SQLAlchemy 'redshift+redshift_connector' dialect (Amazon's official redshift_connector driver). Authenticates with a database username and password. TLS: the driver verifies the server certificate against its own bundled Amazon CA, so ssl_mode values weaker than verify-ca are reconciled upward to verify-ca, and a custom ssl_ca_certificate bundle is not supported by this driver (supplying one fails loudly rather than verifying against the wrong roots). AWS IAM temporary credentials are not supported in this version.",
+  "description": "Amazon Redshift cloud data warehouse connector using the vendor-supported synchronous SQLAlchemy driver redshift+redshift_connector (Amazon's redshift-connector DBAPI via the sqlalchemy-redshift dialect). Redshift has no first-class ADBC driver and exposes no Arrow Flight SQL endpoint; its native bulk-load path is COPY FROM S3 (not the PostgreSQL COPY FROM STDIN protocol) and requires external S3 staging plus IAM, so this connector uses the SQLAlchemy transport for connect, DDL, and writes (batched INSERT with a MERGE-based upsert). The engine dispatches the synchronous driver on its sync engine path. Authenticates with a Redshift database username and password. Works with both provisioned clusters (host *.redshift.amazonaws.com) and Redshift Serverless (host *.redshift-serverless.amazonaws.com), both on port 5439. TLS is negotiated through the redshift_connector driver's two connect parameters (ssl + sslmode); the driver documents only the certificate-verification modes verify-ca and verify-full and verifies against its bundled Amazon Trust CA. AWS IAM database authentication and IdP/SSO federation are alternatives to a static username/password but are NOT modeled in this connector version.",
   "tags": [
     "database",
     "warehouse",
@@ -131,10 +131,6 @@
         "type": "string",
         "required": true,
         "enum": [
-          "disable",
-          "allow",
-          "prefer",
-          "require",
           "verify-ca",
           "verify-full"
         ],

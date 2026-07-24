@@ -16,15 +16,18 @@
 
   { "match": "exact", "canonical": "Utf8",      "native": "VARCHAR(65535)" },
   { "match": "exact", "canonical": "LargeUtf8", "native": "VARCHAR(65535)" },
-  { "match": "exact", "canonical": "Json",      "native": "SUPER" },
 
-  { "match": "exact", "canonical": "Binary",      "native": "VARBYTE(1024000)" },
-  { "match": "exact", "canonical": "LargeBinary", "native": "VARBYTE(1024000)" },
-  { "match": "regex", "canonical": "^FixedSizeBinary\\(\\d+\\)$", "native": "VARBYTE(1024000)" },
+  { "match": "exact", "canonical": "Json",   "native": "SUPER" },
+  { "match": "exact", "canonical": "Object", "native": "SUPER" },
+  { "match": "exact", "canonical": "List",   "native": "SUPER" },
 
-  { "match": "exact", "canonical": "Date32",    "native": "DATE" },
-  { "match": "exact", "canonical": "Date64",    "native": "DATE" },
-  { "match": "regex", "canonical": "^Time(32|64)\\([A-Z]+\\)$",        "native": "TIME" },
-  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+\\)$",          "native": "TIMESTAMP" },
-  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+,\\s*UTC\\)$",  "native": "TIMESTAMPTZ" }
+  { "match": "exact", "canonical": "Binary",      "native": "VARBYTE(16777216)" },
+  { "match": "exact", "canonical": "LargeBinary", "native": "VARBYTE(16777216)" },
+  { "match": "regex", "canonical": "^FixedSizeBinary\\(\\d+\\)$", "native": "VARBYTE(16777216)" },
+
+  { "match": "exact", "canonical": "Date32", "native": "DATE" },
+  { "match": "exact", "canonical": "Date64", "native": "DATE" },
+  { "match": "regex", "canonical": "^Time(32|64)\\([A-Z]+\\)$",       "native": "TIME" },
+  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+,\\s*UTC\\)$", "native": "TIMESTAMPTZ" },
+  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+\\)$",         "native": "TIMESTAMP" }
 ]

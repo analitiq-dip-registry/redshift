@@ -3,9 +3,18 @@
 Everything Redshift-specific lives here, in the connector package: the
 ``redshift.redshift_connector`` SQLAlchemy flavour, the ``MERGE INTO``
 upsert (Redshift has no ``ON CONFLICT``), the ``redshift_connector``
-two-parameter TLS vocabulary, and the ``CREATE SCHEMA`` pre-DDL. The CDK
-base (``GenericSQLConnector`` / ``SqlDialect``) is vendor-neutral and
-never branches on this system.
+two-parameter TLS vocabulary (``ssl`` + ``sslmode``), and the
+``CREATE SCHEMA`` pre-DDL. Column types for the write direction are
+governed entirely by ``definition/type-map-write.json``; this module
+ships no Python type-rendering table. The CDK base
+(``GenericSQLConnector`` / ``SqlDialect``) is vendor-neutral and never
+branches on this system.
+
+Redshift has no first-class ADBC driver and no Arrow Flight SQL endpoint,
+and its native bulk load (``COPY FROM S3``) needs external S3 staging and
+IAM, so the connector takes the synchronous SQLAlchemy transport
+(``redshift+redshift_connector``); the engine runs the sync DBAPI on its
+sync engine path.
 
 Registered under connector_id ``redshift`` via the package entry points
 (``analitiq.source_connectors`` / ``analitiq.destination_connectors``).
@@ -120,11 +129,7 @@ class RedshiftDialect(SqlDialect):
         ``conn.execute(stmt)`` with no parameter map. Backslash is the
         documented escape: the compiler's BIND_PARAMS lookbehind excludes
         it, and BIND_PARAMS_ESC strips the backslash again at compile
-        time, so nothing but the original colon reaches Redshift. Escaping
-        the token shape (rather than every colon) keeps the compiled SQL
-        byte-identical to the unescaped form for every value that has no
-        bind-shaped token — timestamps included, whose colons are already
-        \\w-preceded and were never at risk.
+        time, so nothing but the original colon reaches Redshift.
         """
         return cls._BIND_TOKEN.sub(r"\\:\1", sql)
 
@@ -157,19 +162,24 @@ class RedshiftDialect(SqlDialect):
     def build_tls_connect_args(self, mode: str, ca_pem: str | None) -> Dict[str, Any]:
         """redshift_connector TLS spans two connect parameters: ssl + sslmode.
 
-        The driver only honors verify-ca / verify-full, verifying against
-        its bundled Amazon CA; weaker canonical modes reconcile to
-        TLS-on + verify-ca. No driver parameter exists for a custom CA
-        bundle — fail loudly rather than verify against the wrong roots.
+        The declared ssl_mode enum is verify-ca / verify-full — the only
+        modes the redshift_connector driver documents for its ``sslmode``
+        parameter, both verifying the server certificate against the
+        driver's bundled Amazon Trust CA. The driver exposes no connect
+        parameter for a user-supplied CA bundle, so a non-empty
+        tls.ca_certificate is rejected loudly rather than silently ignored
+        (verifying against the wrong roots would be worse).
 
-        ``none`` is not in the ssl_mode enum; it is accepted as a legacy
-        alias for ``disable`` so connections stored against the v0.0.1
-        vocabulary keep resolving.
+        The broader libpq vocabulary (disable/allow/prefer/require) is not
+        offered for new connections, but is still reconciled here so any
+        connection stored against the connector's prior ADBC/libpq
+        vocabulary keeps resolving: none/disable -> TLS off;
+        allow/prefer/require -> TLS on with verify-ca.
         """
         if ca_pem:
             raise ValueError(
                 f"{self.name}: redshift_connector verifies against its bundled "
-                f"Amazon CA and has no connect parameter for a custom "
+                f"Amazon Trust CA and has no connect parameter for a custom "
                 f"tls.ca_certificate bundle"
             )
         if mode in ("none", "disable"):
@@ -180,7 +190,7 @@ class RedshiftDialect(SqlDialect):
             return {"ssl": True, "sslmode": "verify-full"}
         raise ValueError(
             f"{self.name} tls.mode {mode!r} not recognized; expected one of: "
-            "disable, allow, prefer, require, verify-ca, verify-full"
+            "verify-ca, verify-full"
         )
 
 
