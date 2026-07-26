@@ -27,24 +27,25 @@
   { "match": "regex", "native": "^NVARCHAR(\\([0-9]+\\))?$",          "canonical": "Utf8" },
   { "match": "exact", "native": "TEXT",                              "canonical": "Utf8" },
 
-  { "match": "exact", "native": "DATE",                                       "canonical": "Date32" },
-  { "match": "regex", "native": "^TIME(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",  "canonical": "Time64(MICROSECOND)" },
-  { "match": "regex", "native": "^TIME(\\([0-9]+\\))? WITH TIME ZONE$",        "canonical": "Time64(MICROSECOND)" },
-  { "match": "exact", "native": "TIMETZ",                                     "canonical": "Time64(MICROSECOND)" },
-  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$", "canonical": "Timestamp(MICROSECOND)" },
-  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))? WITH TIME ZONE$",       "canonical": "Timestamp(MICROSECOND, UTC)" },
-  { "match": "exact", "native": "TIMESTAMPTZ",                                    "canonical": "Timestamp(MICROSECOND, UTC)" },
+  { "match": "exact", "native": "DATE",                                            "canonical": "Date32" },
+  { "match": "regex", "native": "^TIME(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",       "canonical": "Time64(MICROSECOND)" },
+  { "match": "regex", "native": "^TIME(\\([0-9]+\\))? WITH TIME ZONE$",             "canonical": "Time64(MICROSECOND)" },
+  { "match": "exact", "native": "TIMETZ",                                          "canonical": "Time64(MICROSECOND)" },
+  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",  "canonical": "Timestamp(MICROSECOND)" },
+  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))? WITH TIME ZONE$",        "canonical": "Timestamp(MICROSECOND, UTC)" },
+  { "match": "exact", "native": "TIMESTAMPTZ",                                     "canonical": "Timestamp(MICROSECOND, UTC)" },
 
   { "match": "exact", "native": "INTERVAL",               "canonical": "Utf8" },
   { "match": "exact", "native": "INTERVAL YEAR TO MONTH", "canonical": "Utf8" },
   { "match": "exact", "native": "INTERVAL DAY TO SECOND", "canonical": "Utf8" },
+  { "match": "regex", "native": "^INTERVAL( (?:YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)( TO (?:MONTH|HOUR|MINUTE|SECOND))?)?(\\([0-9]+\\))?$", "canonical": "Utf8" },
 
   { "match": "regex", "native": "^VARBYTE(\\([0-9]+\\))?$",        "canonical": "Binary" },
   { "match": "regex", "native": "^VARBINARY(\\([0-9]+\\))?$",      "canonical": "Binary" },
   { "match": "regex", "native": "^BINARY VARYING(\\([0-9]+\\))?$", "canonical": "Binary" },
 
   { "match": "exact", "native": "SUPER",     "canonical": "Json" },
-  { "match": "exact", "native": "HLLSKETCH", "canonical": "Binary" },
-  { "match": "exact", "native": "GEOMETRY",  "canonical": "Binary" },
-  { "match": "exact", "native": "GEOGRAPHY", "canonical": "Binary" }
+  { "match": "exact", "native": "HLLSKETCH", "canonical": "Utf8" },
+  { "match": "regex", "native": "^GEOMETRY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$",  "canonical": "Utf8" },
+  { "match": "regex", "native": "^GEOGRAPHY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$", "canonical": "Utf8" }
 ]
