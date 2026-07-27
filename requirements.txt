@@ -1,0 +1,7 @@
+# Amazon Redshift SQLAlchemy dialect: registers the `redshift` and
+# `redshift.redshift_connector` SQLAlchemy dialects behind the DSN scheme
+# `redshift+redshift_connector`.
+sqlalchemy-redshift
+# Amazon's official synchronous DBAPI 2.0 driver for Redshift; the
+# `redshift_connector` flavour the connector connects through.
+redshift-connector

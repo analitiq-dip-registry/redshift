@@ -1,0 +1,51 @@
+[
+  { "match": "exact", "native": "SMALLINT",          "canonical": "Int16" },
+  { "match": "exact", "native": "INT2",              "canonical": "Int16" },
+  { "match": "exact", "native": "INTEGER",           "canonical": "Int32" },
+  { "match": "exact", "native": "INT",               "canonical": "Int32" },
+  { "match": "exact", "native": "INT4",              "canonical": "Int32" },
+  { "match": "exact", "native": "BIGINT",            "canonical": "Int64" },
+  { "match": "exact", "native": "INT8",              "canonical": "Int64" },
+  { "match": "exact", "native": "REAL",              "canonical": "Float32" },
+  { "match": "exact", "native": "FLOAT4",            "canonical": "Float32" },
+  { "match": "exact", "native": "DOUBLE PRECISION",  "canonical": "Float64" },
+  { "match": "exact", "native": "FLOAT8",            "canonical": "Float64" },
+  { "match": "exact", "native": "FLOAT",             "canonical": "Float64" },
+  { "match": "exact", "native": "BOOLEAN",           "canonical": "Boolean" },
+  { "match": "exact", "native": "BOOL",              "canonical": "Boolean" },
+
+  { "match": "regex", "native": "^(?:DECIMAL|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8]),\\s*(?<scale>[0-9]+)\\)$", "canonical": "Decimal128(${precision}, ${scale})" },
+  { "match": "regex", "native": "^(?:DECIMAL|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8])\\)$",                      "canonical": "Decimal128(${precision}, 0)" },
+  { "match": "regex", "native": "^(?:DECIMAL|NUMERIC)$",                                                                "canonical": "Decimal128(18, 0)" },
+
+  { "match": "regex", "native": "^CHAR(\\([0-9]+\\))?$",              "canonical": "Utf8" },
+  { "match": "regex", "native": "^CHARACTER(\\([0-9]+\\))?$",         "canonical": "Utf8" },
+  { "match": "regex", "native": "^NCHAR(\\([0-9]+\\))?$",             "canonical": "Utf8" },
+  { "match": "regex", "native": "^BPCHAR(\\([0-9]+\\))?$",            "canonical": "Utf8" },
+  { "match": "regex", "native": "^VARCHAR(\\([0-9]+\\))?$",           "canonical": "Utf8" },
+  { "match": "regex", "native": "^CHARACTER VARYING(\\([0-9]+\\))?$", "canonical": "Utf8" },
+  { "match": "regex", "native": "^NVARCHAR(\\([0-9]+\\))?$",          "canonical": "Utf8" },
+  { "match": "exact", "native": "TEXT",                              "canonical": "Utf8" },
+
+  { "match": "exact", "native": "DATE",                                            "canonical": "Date32" },
+  { "match": "regex", "native": "^TIME(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",       "canonical": "Time64(MICROSECOND)" },
+  { "match": "regex", "native": "^TIME(\\([0-9]+\\))? WITH TIME ZONE$",             "canonical": "Time64(MICROSECOND)" },
+  { "match": "exact", "native": "TIMETZ",                                          "canonical": "Time64(MICROSECOND)" },
+  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",  "canonical": "Timestamp(MICROSECOND)" },
+  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))? WITH TIME ZONE$",        "canonical": "Timestamp(MICROSECOND, UTC)" },
+  { "match": "exact", "native": "TIMESTAMPTZ",                                     "canonical": "Timestamp(MICROSECOND, UTC)" },
+
+  { "match": "exact", "native": "INTERVAL",               "canonical": "Utf8" },
+  { "match": "exact", "native": "INTERVAL YEAR TO MONTH", "canonical": "Utf8" },
+  { "match": "exact", "native": "INTERVAL DAY TO SECOND", "canonical": "Utf8" },
+  { "match": "regex", "native": "^INTERVAL( (?:YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)( TO (?:MONTH|HOUR|MINUTE|SECOND))?)?(\\([0-9]+\\))?$", "canonical": "Utf8" },
+
+  { "match": "regex", "native": "^VARBYTE(\\([0-9]+\\))?$",        "canonical": "Binary" },
+  { "match": "regex", "native": "^VARBINARY(\\([0-9]+\\))?$",      "canonical": "Binary" },
+  { "match": "regex", "native": "^BINARY VARYING(\\([0-9]+\\))?$", "canonical": "Binary" },
+
+  { "match": "exact", "native": "SUPER",     "canonical": "Json" },
+  { "match": "exact", "native": "HLLSKETCH", "canonical": "Utf8" },
+  { "match": "regex", "native": "^GEOMETRY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$",  "canonical": "Utf8" },
+  { "match": "regex", "native": "^GEOGRAPHY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$", "canonical": "Utf8" }
+]

@@ -3,7 +3,8 @@
   "kind": "database",
   "connector_id": "redshift",
   "display_name": "Amazon Redshift",
-  "description": "Amazon Redshift cloud data warehouse connector using the SQLAlchemy 'redshift+redshift_connector' dialect (Amazon's official redshift_connector driver). Authenticates with a database username and password over TLS. AWS IAM temporary credentials are not supported in this version.",
+  "description": "Amazon Redshift cloud data warehouse connector using the vendor-supported synchronous SQLAlchemy driver redshift+redshift_connector (Amazon's redshift-connector DBAPI via the sqlalchemy-redshift dialect). Redshift has no first-class ADBC driver and exposes no Arrow Flight SQL endpoint; its native bulk load (COPY) reads only from S3/EMR/DynamoDB/SSH and never from the client connection, so there is no COPY FROM STDIN path to implement and the connector uses the SQLAlchemy transport for connect, DDL, and writes: batched INSERT plus a MERGE-based upsert (Redshift has no ON CONFLICT), with no bulk-load mechanism declared. The engine dispatches the synchronous driver on its sync engine path. Works with both provisioned clusters (host *.redshift.amazonaws.com) and Redshift Serverless (host *.redshift-serverless.amazonaws.com), both on port 5439. Authenticates with a Redshift database username and password. TLS is negotiated through the redshift_connector driver's two connect parameters (ssl + sslmode); the driver documents only the certificate-verification modes verify-ca and verify-full and verifies against its bundled Amazon Trust CA. AWS IAM database authentication and IdP/SSO federation are alternatives to a static username/password but are NOT modeled in this connector version.",
+  "documentation_url": "https://docs.aws.amazon.com/redshift/latest/dg/welcome.html",
   "tags": [
     "database",
     "warehouse",
@@ -131,9 +132,6 @@
         "type": "string",
         "required": true,
         "enum": [
-          "none",
-          "prefer",
-          "require",
           "verify-ca",
           "verify-full"
         ],
@@ -176,6 +174,47 @@
     "triggers": {
       "list_resources": "on_activation",
       "describe_resource": "on_resource_selected"
+    }
+  },
+  "sql_capabilities": {
+    "catalog": "read",
+    "session_targeting": "per_statement",
+    "merge_form": "merge",
+    "bulk_load": {},
+    "stage": {
+      "scope": "temp",
+      "schema": "target",
+      "transactional_ddl": true
+    },
+    "limits": {
+      "max_bind_params": 32767,
+      "max_identifier_len": 127
+    }
+  },
+  "write_unit": {
+    "rows": 2000,
+    "bytes": 1048576
+  },
+  "concurrency": {
+    "max_connections": 50
+  },
+  "error_map": {
+    "sqlstate": {
+      "08": "unreachable",
+      "22": "write_rejected",
+      "23": "write_rejected",
+      "28": "auth",
+      "3D": "config",
+      "3F": "config",
+      "40001": "transient",
+      "42501": "config",
+      "42P01": "config",
+      "42804": "write_rejected",
+      "53300": "transient",
+      "57014": "transient"
+    },
+    "exception": {
+      "InterfaceError": "unreachable"
     }
   }
 }
