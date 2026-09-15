@@ -1,51 +1,221 @@
-[
-  { "match": "exact", "native": "SMALLINT",          "canonical": "Int16" },
-  { "match": "exact", "native": "INT2",              "canonical": "Int16" },
-  { "match": "exact", "native": "INTEGER",           "canonical": "Int32" },
-  { "match": "exact", "native": "INT",               "canonical": "Int32" },
-  { "match": "exact", "native": "INT4",              "canonical": "Int32" },
-  { "match": "exact", "native": "BIGINT",            "canonical": "Int64" },
-  { "match": "exact", "native": "INT8",              "canonical": "Int64" },
-  { "match": "exact", "native": "REAL",              "canonical": "Float32" },
-  { "match": "exact", "native": "FLOAT4",            "canonical": "Float32" },
-  { "match": "exact", "native": "DOUBLE PRECISION",  "canonical": "Float64" },
-  { "match": "exact", "native": "FLOAT8",            "canonical": "Float64" },
-  { "match": "exact", "native": "FLOAT",             "canonical": "Float64" },
-  { "match": "exact", "native": "BOOLEAN",           "canonical": "Boolean" },
-  { "match": "exact", "native": "BOOL",              "canonical": "Boolean" },
-
-  { "match": "regex", "native": "^(?:DECIMAL|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8]),\\s*(?<scale>[0-9]+)\\)$", "canonical": "Decimal128(${precision}, ${scale})" },
-  { "match": "regex", "native": "^(?:DECIMAL|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8])\\)$",                      "canonical": "Decimal128(${precision}, 0)" },
-  { "match": "regex", "native": "^(?:DECIMAL|NUMERIC)$",                                                                "canonical": "Decimal128(18, 0)" },
-
-  { "match": "regex", "native": "^CHAR(\\([0-9]+\\))?$",              "canonical": "Utf8" },
-  { "match": "regex", "native": "^CHARACTER(\\([0-9]+\\))?$",         "canonical": "Utf8" },
-  { "match": "regex", "native": "^NCHAR(\\([0-9]+\\))?$",             "canonical": "Utf8" },
-  { "match": "regex", "native": "^BPCHAR(\\([0-9]+\\))?$",            "canonical": "Utf8" },
-  { "match": "regex", "native": "^VARCHAR(\\([0-9]+\\))?$",           "canonical": "Utf8" },
-  { "match": "regex", "native": "^CHARACTER VARYING(\\([0-9]+\\))?$", "canonical": "Utf8" },
-  { "match": "regex", "native": "^NVARCHAR(\\([0-9]+\\))?$",          "canonical": "Utf8" },
-  { "match": "exact", "native": "TEXT",                              "canonical": "Utf8" },
-
-  { "match": "exact", "native": "DATE",                                            "canonical": "Date32" },
-  { "match": "regex", "native": "^TIME(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",       "canonical": "Time64(MICROSECOND)" },
-  { "match": "regex", "native": "^TIME(\\([0-9]+\\))? WITH TIME ZONE$",             "canonical": "Time64(MICROSECOND)" },
-  { "match": "exact", "native": "TIMETZ",                                          "canonical": "Time64(MICROSECOND)" },
-  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",  "canonical": "Timestamp(MICROSECOND)" },
-  { "match": "regex", "native": "^TIMESTAMP(\\([0-9]+\\))? WITH TIME ZONE$",        "canonical": "Timestamp(MICROSECOND, UTC)" },
-  { "match": "exact", "native": "TIMESTAMPTZ",                                     "canonical": "Timestamp(MICROSECOND, UTC)" },
-
-  { "match": "exact", "native": "INTERVAL",               "canonical": "Utf8" },
-  { "match": "exact", "native": "INTERVAL YEAR TO MONTH", "canonical": "Utf8" },
-  { "match": "exact", "native": "INTERVAL DAY TO SECOND", "canonical": "Utf8" },
-  { "match": "regex", "native": "^INTERVAL( (?:YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)( TO (?:MONTH|HOUR|MINUTE|SECOND))?)?(\\([0-9]+\\))?$", "canonical": "Utf8" },
-
-  { "match": "regex", "native": "^VARBYTE(\\([0-9]+\\))?$",        "canonical": "Binary" },
-  { "match": "regex", "native": "^VARBINARY(\\([0-9]+\\))?$",      "canonical": "Binary" },
-  { "match": "regex", "native": "^BINARY VARYING(\\([0-9]+\\))?$", "canonical": "Binary" },
-
-  { "match": "exact", "native": "SUPER",     "canonical": "Json" },
-  { "match": "exact", "native": "HLLSKETCH", "canonical": "Utf8" },
-  { "match": "regex", "native": "^GEOMETRY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$",  "canonical": "Utf8" },
-  { "match": "regex", "native": "^GEOGRAPHY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$", "canonical": "Utf8" }
-]
+{
+  "$schema": "https://schemas.analitiq.ai/type-map-read/latest.json",
+  "direction": "read",
+  "rules": [
+    {
+      "match": "exact",
+      "native_type": "SMALLINT",
+      "arrow_type": "Int16"
+    },
+    {
+      "match": "exact",
+      "native_type": "INT2",
+      "arrow_type": "Int16"
+    },
+    {
+      "match": "exact",
+      "native_type": "INTEGER",
+      "arrow_type": "Int32"
+    },
+    {
+      "match": "exact",
+      "native_type": "INT",
+      "arrow_type": "Int32"
+    },
+    {
+      "match": "exact",
+      "native_type": "INT4",
+      "arrow_type": "Int32"
+    },
+    {
+      "match": "exact",
+      "native_type": "BIGINT",
+      "arrow_type": "Int64"
+    },
+    {
+      "match": "exact",
+      "native_type": "INT8",
+      "arrow_type": "Int64"
+    },
+    {
+      "match": "exact",
+      "native_type": "REAL",
+      "arrow_type": "Float32"
+    },
+    {
+      "match": "exact",
+      "native_type": "FLOAT4",
+      "arrow_type": "Float32"
+    },
+    {
+      "match": "exact",
+      "native_type": "DOUBLE PRECISION",
+      "arrow_type": "Float64"
+    },
+    {
+      "match": "exact",
+      "native_type": "FLOAT8",
+      "arrow_type": "Float64"
+    },
+    {
+      "match": "exact",
+      "native_type": "FLOAT",
+      "arrow_type": "Float64"
+    },
+    {
+      "match": "exact",
+      "native_type": "BOOLEAN",
+      "arrow_type": "Boolean"
+    },
+    {
+      "match": "exact",
+      "native_type": "BOOL",
+      "arrow_type": "Boolean"
+    },
+    {
+      "match": "regex",
+      "native_type": "^(?:DECIMAL|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8]),\\s*(?<scale>[0-9]+)\\)$",
+      "arrow_type": "Decimal128(${precision}, ${scale})"
+    },
+    {
+      "match": "regex",
+      "native_type": "^(?:DECIMAL|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8])\\)$",
+      "arrow_type": "Decimal128(${precision}, 0)"
+    },
+    {
+      "match": "regex",
+      "native_type": "^(?:DECIMAL|NUMERIC)$",
+      "arrow_type": "Decimal128(18, 0)"
+    },
+    {
+      "match": "regex",
+      "native_type": "^CHAR(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^CHARACTER(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^NCHAR(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^BPCHAR(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^VARCHAR(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^CHARACTER VARYING(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^NVARCHAR(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "exact",
+      "native_type": "TEXT",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "exact",
+      "native_type": "DATE",
+      "arrow_type": "Date32"
+    },
+    {
+      "match": "regex",
+      "native_type": "^TIME(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",
+      "arrow_type": "Time64(MICROSECOND)"
+    },
+    {
+      "match": "regex",
+      "native_type": "^TIME(\\([0-9]+\\))? WITH TIME ZONE$",
+      "arrow_type": "Time64(MICROSECOND)"
+    },
+    {
+      "match": "exact",
+      "native_type": "TIMETZ",
+      "arrow_type": "Time64(MICROSECOND)"
+    },
+    {
+      "match": "regex",
+      "native_type": "^TIMESTAMP(\\([0-9]+\\))?( WITHOUT TIME ZONE)?$",
+      "arrow_type": "Timestamp(MICROSECOND)"
+    },
+    {
+      "match": "regex",
+      "native_type": "^TIMESTAMP(\\([0-9]+\\))? WITH TIME ZONE$",
+      "arrow_type": "Timestamp(MICROSECOND, UTC)"
+    },
+    {
+      "match": "exact",
+      "native_type": "TIMESTAMPTZ",
+      "arrow_type": "Timestamp(MICROSECOND, UTC)"
+    },
+    {
+      "match": "exact",
+      "native_type": "INTERVAL",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "exact",
+      "native_type": "INTERVAL YEAR TO MONTH",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "exact",
+      "native_type": "INTERVAL DAY TO SECOND",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^INTERVAL( (?:YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)( TO (?:MONTH|HOUR|MINUTE|SECOND))?)?(\\([0-9]+\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^VARBYTE(\\([0-9]+\\))?$",
+      "arrow_type": "Binary"
+    },
+    {
+      "match": "regex",
+      "native_type": "^VARBINARY(\\([0-9]+\\))?$",
+      "arrow_type": "Binary"
+    },
+    {
+      "match": "regex",
+      "native_type": "^BINARY VARYING(\\([0-9]+\\))?$",
+      "arrow_type": "Binary"
+    },
+    {
+      "match": "exact",
+      "native_type": "SUPER",
+      "arrow_type": "Json"
+    },
+    {
+      "match": "exact",
+      "native_type": "HLLSKETCH",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^GEOMETRY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "regex",
+      "native_type": "^GEOGRAPHY(\\([A-Z]+(,\\s*[0-9]+)?\\))?$",
+      "arrow_type": "Utf8"
+    }
+  ]
+}
