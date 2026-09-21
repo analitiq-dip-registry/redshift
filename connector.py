@@ -6,7 +6,7 @@ write hooks (``CREATE TEMPORARY TABLE ... (LIKE ...)`` for the stage and
 ``MERGE INTO`` for the upsert — Redshift has no ``ON CONFLICT``), the
 ``redshift_connector`` two-parameter TLS vocabulary (``ssl`` + ``sslmode``),
 and the ``CREATE SCHEMA`` pre-DDL. Column types for the write direction are
-governed entirely by ``definition/type-map-write.json``; this module ships
+governed entirely by ``definition/type-map.json`` (its ``write`` rules); this module ships
 no Python type-rendering table. The CDK base (``GenericSQLConnector`` /
 ``SqlDialect``) is vendor-neutral and never branches on this system.
 

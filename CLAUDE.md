@@ -108,6 +108,7 @@ Read-map regex natives are authored **UPPERCASE** — the engine uppercases the 
 - `TIMETZ` → Time64 — the zone is dropped by design; Arrow has no zone-aware time-of-day type
 - Bare `DECIMAL` / `NUMERIC` → `Decimal128(18, 0)` — AWS's documented Redshift default, **not** Postgres's `(38, 0)`
 - Write side: `Utf8` → `VARCHAR(65535)`, never `TEXT` — Redshift silently aliases `TEXT` to `VARCHAR(256)`, which truncates
+- Read side: the parameterized `DECIMAL(p, s)`/`NUMERIC(p, s)` rule bounds the `scale` capture to 0–37 for the same reason (the contract rejects a capture that can match a scale the Arrow position refuses)
 - Write side: `Decimal` scale is bounded to 0–37 — Redshift's maximum DECIMAL scale is 37, so `Decimal128(38, 38)` fails at configuration time rather than emitting DDL the server rejects
 - Write side: `Duration(*)` → **`VARCHAR(65535)`, not `INTERVAL DAY TO SECOND`** — and the native must stay character-identical to the `Utf8` rule. The read map maps every INTERVAL to Utf8, so a write rule rendering INTERVAL never converges (`Duration` → INTERVAL → Utf8 → VARCHAR), and the CDK's tier-1 `type-map-convergence` check fails it: a re-created destination table would silently change that column's type. A "right-sized" `VARCHAR(64)` would fail the same check. Any future write rule whose native reads back as `Utf8` is under the same obligation
 
@@ -126,7 +127,7 @@ Read-map regex natives are authored **UPPERCASE** — the engine uppercases the 
 | `sql_capabilities.limits.max_bind_params` | `32767` | **Weakest grounding here.** Inferred from the PostgreSQL wire `Bind` Int16 parameter count, not an AWS-documented figure, and never exercised live. Challenge it if a live run contradicts it |
 | `write_unit` | 2000 rows / 1 MiB | Derived, not documented. Redshift caps a single statement at 16 MB and the MERGE inlines the whole batch as literals (~5–8× inflation), so this keeps the rendered statement well under the ceiling |
 | `concurrency.max_connections` | `50` | Deliberately **not** the 500–2000 server ceiling, which is a *shared* budget across all cluster clients. AWS caps total WLM concurrency at 50, so beyond that queries queue rather than parallelize |
-| `error_map` | 11 SQLSTATEs + 1 exception | `XX000` is **deliberately unmapped**: it is Redshift's catch-all internal error and is also the state for serializable isolation failures, which AWS says to retry — mapping it to `write_rejected` would turn a retryable conflict fatal |
+| `error_map` | 6 full SQLSTATEs + 1 exception class (`key_attrs: [sqlstate, __exception_class__]`) | `XX000` is **deliberately unmapped**: it is Redshift's catch-all internal error and is also the state for serializable isolation failures, which AWS says to retry — mapping it to `write_rejected` would turn a retryable conflict fatal |
 
 ## Caveats
 
