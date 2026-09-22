@@ -200,17 +200,16 @@
   },
   "error_map": {
     "key_attrs": [
-      "sqlstate",
-      "__exception_class__"
+      "sqlstate"
     ],
     "codes": {
+      "28000": "auth",
       "40001": "transient",
       "42501": "config",
       "42P01": "config",
       "42804": "write_rejected",
       "53300": "transient",
-      "57014": "transient",
-      "InterfaceError": "unreachable"
+      "57014": "transient"
     }
   }
 }
