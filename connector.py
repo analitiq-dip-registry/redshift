@@ -276,13 +276,16 @@ class RedshiftConnector(GenericSQLConnector):
         redshift_connector's own exception classes (``redshift_connector.error``)
         carry no ``.sqlstate`` attribute — the wire protocol's SQLSTATE lands in
         ``args[0]["C"]`` of whichever class ``handle_ERROR_RESPONSE`` raises
-        (``redshift_connector.core``), so the declared ``error_map``'s
-        ``key_attrs`` lookup, a flat attribute read, can never see it; only
-        ``__exception_class__`` (``InterfaceError`` → ``unreachable``) ever
-        matches. This is the CDK's documented code escape hatch for exactly
-        that case: unwrap SQLAlchemy's one driver-wrapping hop (``.orig``) and
-        re-run the connector's own declared ``error_map`` against the
-        recovered value — never a second codes table.
+        (``redshift_connector.core``). ``definition/connector.json``'s declared
+        ``error_map`` has only ``key_attrs: ["sqlstate"]``, a flat attribute
+        read, so it can never see it either — this is the CDK's documented
+        code escape hatch for exactly that case, consulted only once the
+        declared lookup misses: unwrap SQLAlchemy's one driver-wrapping hop
+        (``.orig``) and re-run the connector's own declared ``error_map``
+        against the recovered value — never a second codes table. (Keep this
+        in sync with ``definition/connector.json``'s ``error_map`` and with
+        CLAUDE.md's capabilities table — both describe the same declared
+        block and drifted out of sync with each other once already.)
         """
         for member in (exc, getattr(exc, "orig", None)):
             args = getattr(member, "args", None)
