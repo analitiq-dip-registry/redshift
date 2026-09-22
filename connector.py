@@ -253,7 +253,45 @@ class RedshiftDialect(SqlDialect):
         )
 
 
+class _RecoveredSqlstate(Exception):
+    """Carries a SQLSTATE recovered from redshift_connector's error dict as a
+    flat ``.sqlstate`` attribute, so it can be re-run through
+    :meth:`~cdk.declarations.ErrorMap.match_exception`'s declared-codes lookup.
+    Never raised — only ever passed for classification.
+    """
+
+    def __init__(self, sqlstate: str) -> None:
+        super().__init__(sqlstate)
+        self.sqlstate = sqlstate
+
+
 class RedshiftConnector(GenericSQLConnector):
     """Redshift connector: the CDK SQL base wired to the redshift dialect."""
 
     dialect_class = RedshiftDialect
+
+    def classify_error(self, exc: BaseException) -> str | None:
+        """Recover SQLSTATE from redshift_connector's raw error dict.
+
+        redshift_connector's own exception classes (``redshift_connector.error``)
+        carry no ``.sqlstate`` attribute — the wire protocol's SQLSTATE lands in
+        ``args[0]["C"]`` of whichever class ``handle_ERROR_RESPONSE`` raises
+        (``redshift_connector.core``), so the declared ``error_map``'s
+        ``key_attrs`` lookup, a flat attribute read, can never see it; only
+        ``__exception_class__`` (``InterfaceError`` → ``unreachable``) ever
+        matches. This is the CDK's documented code escape hatch for exactly
+        that case: unwrap SQLAlchemy's one driver-wrapping hop (``.orig``) and
+        re-run the connector's own declared ``error_map`` against the
+        recovered value — never a second codes table.
+        """
+        for member in (exc, getattr(exc, "orig", None)):
+            args = getattr(member, "args", None)
+            if not args or not isinstance(args[0], dict):
+                continue
+            sqlstate = args[0].get("C")
+            if not sqlstate or self._error_map is None:
+                continue
+            match = self._error_map.match_exception(_RecoveredSqlstate(sqlstate))
+            if match is not None:
+                return match.category
+        return None

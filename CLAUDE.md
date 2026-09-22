@@ -26,7 +26,7 @@ AWS is explicit: *"PostgreSQL drivers are not tested and not supported by the Am
 
 **Validation: resolved as of contract `1.0.0rc14`.** This section previously documented a deliberate validation failure — `driver: "redshift+redshift_connector"` was rejected by the contract's async-only `SqlAlchemyTransport.driver` pattern (`^[a-z][a-z0-9_]*\+(asyncpg|aiomysql|asyncmy|aiosqlite|oracledb)$`). That constraint was replaced at rc14 with a generic `dialect+driver` shape check (`^[a-z][a-z0-9_]*\+[a-z][a-z0-9_]*$`), which imposes no driver allow-list; dialect-registration validity is deferred to transport build time. The field's description now cites `redshift+redshift_connector` as a supported example rather than naming it unsupported.
 
-The whole definition validates clean at rc17 (connector + both type maps, zero findings).
+The whole definition validates clean at rc25 (connector + `definition/type-map.json`, zero findings).
 
 - The engine gained its synchronous SQLAlchemy transport in analitiq-ai/analitiq-engine#239 (closing #224, merged 2026-06-10), built for `redshift_connector` specifically.
 - The two workarounds that were rejected at the time remain wrong and must not be reintroduced. `redshift+asyncpg` is a **fabrication** — no vendor documents that combination; it would validate and die at connect. Deleting the `driver` field is schema-valid (`driver` is optional) but merely relocates the sync driver into the DSN template and `options`, where nothing validates it — converting a loud error into a silent connect-time failure. That was PR #6; it is closed.
@@ -112,7 +112,7 @@ Read-map regex natives are authored **UPPERCASE** — the engine uppercases the 
 - Write side: `Decimal` scale is bounded to 0–37 — Redshift's maximum DECIMAL scale is 37, so `Decimal128(38, 38)` fails at configuration time rather than emitting DDL the server rejects
 - Write side: `Duration(*)` → **`VARCHAR(65535)`, not `INTERVAL DAY TO SECOND`** — and the native must stay character-identical to the `Utf8` rule. The read map maps every INTERVAL to Utf8, so a write rule rendering INTERVAL never converges (`Duration` → INTERVAL → Utf8 → VARCHAR), and the CDK's tier-1 `type-map-convergence` check fails it: a re-created destination table would silently change that column's type. A "right-sized" `VARCHAR(64)` would fail the same check. Any future write rule whose native reads back as `Utf8` is under the same obligation
 
-## Declared capabilities (contract rc16/rc17)
+## Declared capabilities (contract rc25)
 
 `definition/connector.json` declares four optional blocks the engine reads instead of probing the live database. `sql_capabilities` is the load-bearing one: the CDK treats an undeclared block as "unknown" and makes dependent gates refuse loudly rather than guess.
 
