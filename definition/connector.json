@@ -199,22 +199,17 @@
     "max_connections": 50
   },
   "error_map": {
-    "sqlstate": {
-      "08": "unreachable",
-      "22": "write_rejected",
-      "23": "write_rejected",
-      "28": "auth",
-      "3D": "config",
-      "3F": "config",
+    "key_attrs": [
+      "sqlstate"
+    ],
+    "codes": {
+      "28000": "auth",
       "40001": "transient",
       "42501": "config",
       "42P01": "config",
       "42804": "write_rejected",
       "53300": "transient",
       "57014": "transient"
-    },
-    "exception": {
-      "InterfaceError": "unreachable"
     }
   }
 }

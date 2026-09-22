@@ -6,7 +6,7 @@ write hooks (``CREATE TEMPORARY TABLE ... (LIKE ...)`` for the stage and
 ``MERGE INTO`` for the upsert — Redshift has no ``ON CONFLICT``), the
 ``redshift_connector`` two-parameter TLS vocabulary (``ssl`` + ``sslmode``),
 and the ``CREATE SCHEMA`` pre-DDL. Column types for the write direction are
-governed entirely by ``definition/type-map-write.json``; this module ships
+governed entirely by ``definition/type-map.json`` (its ``write`` rules); this module ships
 no Python type-rendering table. The CDK base (``GenericSQLConnector`` /
 ``SqlDialect``) is vendor-neutral and never branches on this system.
 
@@ -253,7 +253,48 @@ class RedshiftDialect(SqlDialect):
         )
 
 
+class _RecoveredSqlstate(Exception):
+    """Carries a SQLSTATE recovered from redshift_connector's error dict as a
+    flat ``.sqlstate`` attribute, so it can be re-run through
+    :meth:`~cdk.declarations.ErrorMap.match_exception`'s declared-codes lookup.
+    Never raised — only ever passed for classification.
+    """
+
+    def __init__(self, sqlstate: str) -> None:
+        super().__init__(sqlstate)
+        self.sqlstate = sqlstate
+
+
 class RedshiftConnector(GenericSQLConnector):
     """Redshift connector: the CDK SQL base wired to the redshift dialect."""
 
     dialect_class = RedshiftDialect
+
+    def classify_error(self, exc: BaseException) -> str | None:
+        """Recover SQLSTATE from redshift_connector's raw error dict.
+
+        redshift_connector's own exception classes (``redshift_connector.error``)
+        carry no ``.sqlstate`` attribute — the wire protocol's SQLSTATE lands in
+        ``args[0]["C"]`` of whichever class ``handle_ERROR_RESPONSE`` raises
+        (``redshift_connector.core``). ``definition/connector.json``'s declared
+        ``error_map`` has only ``key_attrs: ["sqlstate"]``, a flat attribute
+        read, so it can never see it either — this is the CDK's documented
+        code escape hatch for exactly that case, consulted only once the
+        declared lookup misses: unwrap SQLAlchemy's one driver-wrapping hop
+        (``.orig``) and re-run the connector's own declared ``error_map``
+        against the recovered value — never a second codes table. (Keep this
+        in sync with ``definition/connector.json``'s ``error_map`` and with
+        CLAUDE.md's capabilities table — both describe the same declared
+        block and drifted out of sync with each other once already.)
+        """
+        for member in (exc, getattr(exc, "orig", None)):
+            args = getattr(member, "args", None)
+            if not args or not isinstance(args[0], dict):
+                continue
+            sqlstate = args[0].get("C")
+            if not sqlstate or self._error_map is None:
+                continue
+            match = self._error_map.match_exception(_RecoveredSqlstate(sqlstate))
+            if match is not None:
+                return match.category
+        return None
